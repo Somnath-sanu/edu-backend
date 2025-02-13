@@ -16,6 +16,10 @@ app.use(cors());
 //   dangerouslyAllowBrowser: true,
 // });
 
+app.get("/", (req, res) => {
+  res.send("Backend working");
+});
+
 app.post("/api/generate", async (req, res) => {
   const { systemPrompt, userPrompt, maxTokens = 5000 } = req.body;
 
