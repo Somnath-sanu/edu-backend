@@ -42,7 +42,7 @@ app.post("/api/generate", async (req, res) => {
     const sanitizedUserPrompt = userPrompt.replace(/[\r\n]+/g, " ").trim();
     const sanitizedSystemPrompt = systemPrompt.replace(/[\r\n]+/g, " ").trim();
 
-    const model = gemini(sanitizedSystemPrompt);
+    const model = gemini(systemPrompt);
 
     const result = await model.generateContent({
       contents: [
