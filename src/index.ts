@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { generatePromts } from "./explore-content";
 import { gemini } from "./gemini";
+import { Request , Response } from "express"
 
 dotenv.config();
 
@@ -16,11 +17,11 @@ app.use(cors());
 //   dangerouslyAllowBrowser: true,
 // });
 
-app.get("/", (req, res) => {
+app.get("/", (req:Request, res: Response) => {
   res.send("Backend working");
 });
 
-app.post("/api/generate", async (req, res) => {
+app.post("/api/generate", async (req:Request, res: Response) => {
   const { systemPrompt, userPrompt, maxTokens = 5000 } = req.body;
 
   try {
@@ -69,7 +70,7 @@ app.post("/api/generate", async (req, res) => {
   }
 });
 
-app.post("/api/explore", async (req, res) => {
+app.post("/api/explore", async (req:Request, res: Response) => {
   const { query } = req.body;
   if (!query) {
     res.json({
@@ -120,7 +121,7 @@ app.post("/api/explore", async (req, res) => {
   }
 });
 
-app.post("/api/explore-content", async (req, res) => {
+app.post("/api/explore-content", async (req:Request, res: Response) => {
   const { query, age } = req.body;
 
   if (!query || !age) {
