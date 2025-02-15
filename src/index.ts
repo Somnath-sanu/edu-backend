@@ -5,12 +5,16 @@ import cors from "cors";
 import { generatePromts } from "./explore-content";
 import { gemini } from "./gemini";
 import { Request, Response } from "express";
+import { dailyLimiter, hourlyLimiter, minuteLimiter } from "./limiter";
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use(minuteLimiter);
+app.use(hourlyLimiter);
+app.use(dailyLimiter);
 
 // const openai = new OpenAI({
 //   apiKey: process.env.OPENAI_API_KEY!,
@@ -44,9 +48,6 @@ app.post("/api/generate", async (req: Request, res: Response) => {
     //   ],
     //   max_tokens: maxTokens,
     // });
-
-   
-    
 
     const sanitizedUserPrompt = userPrompt.replace(/[\r\n]+/g, " ").trim();
     const sanitizedSystemPrompt = systemPrompt.replace(/[\r\n]+/g, " ").trim();

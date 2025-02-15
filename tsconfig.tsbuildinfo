@@ -1,1 +1,1 @@
-{"root":["./src/explore-content.ts","./src/gemini.ts","./src/index.ts"],"version":"5.6.2"}
+{"root":["./src/explore-content.ts","./src/gemini.ts","./src/index.ts","./src/limiter.ts"],"version":"5.6.2"}
