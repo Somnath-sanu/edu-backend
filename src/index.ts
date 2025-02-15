@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { generatePromts } from "./explore-content";
 import { gemini } from "./gemini";
-import { Request , Response } from "express"
+import { Request, Response } from "express";
 
 dotenv.config();
 
@@ -17,12 +17,17 @@ app.use(cors());
 //   dangerouslyAllowBrowser: true,
 // });
 
-app.get("/", (req:Request, res: Response) => {
+app.get("/", (req: Request, res: Response) => {
   res.send("Backend working");
 });
 
-app.post("/api/generate", async (req:Request, res: Response) => {
-  const { systemPrompt, userPrompt, maxTokens = 5000 } = req.body;
+app.post("/api/generate", async (req: Request, res: Response) => {
+  const {
+    systemPrompt,
+    userPrompt,
+    maxTokens = 5000,
+    userLanguage = "english",
+  } = req.body;
 
   try {
     // const response = await openai.chat.completions.create({
@@ -43,7 +48,12 @@ app.post("/api/generate", async (req:Request, res: Response) => {
     const sanitizedUserPrompt = userPrompt.replace(/[\r\n]+/g, " ").trim();
     const sanitizedSystemPrompt = systemPrompt.replace(/[\r\n]+/g, " ").trim();
 
-    const model = gemini(systemPrompt);
+    const languageInstruction =
+      userLanguage === "english"
+        ? "Please respond in english"
+        : "सभी उत्तर हिंदी में दें। कृपया हिंदी में ही उत्तर दें।";
+
+    const model = gemini(systemPrompt, userLanguage);
 
     const result = await model.generateContent({
       contents: [
@@ -51,7 +61,7 @@ app.post("/api/generate", async (req:Request, res: Response) => {
           role: "user",
           parts: [
             {
-              text: sanitizedUserPrompt,
+              text: `${languageInstruction} ${sanitizedUserPrompt}`,
             },
           ],
         },
@@ -63,15 +73,13 @@ app.post("/api/generate", async (req:Request, res: Response) => {
 
     res.json({ content: result.response });
   } catch (error) {
-    // console.error("OpenAI API Error:", error);
-    // res.status(500).json({ error: "Failed to generate content" });
     console.error("Gemini API Error:", error);
     res.status(500).json({ error: "Failed to generate content" });
   }
 });
 
-app.post("/api/explore", async (req:Request, res: Response) => {
-  const { query } = req.body;
+app.post("/api/explore", async (req: Request, res: Response) => {
+  const { query, userLanguage = "english" } = req.body;
   if (!query) {
     res.json({
       message: "No query provided!!",
@@ -99,18 +107,27 @@ app.post("/api/explore", async (req:Request, res: Response) => {
     const systemPrompt =
       "You are a social media trend expert who explains topics by connecting them to current viral trends, memes, and pop culture moments.";
 
-    const model = gemini(systemPrompt);
+    const languageInstruction =
+      userLanguage === "english"
+        ? "Please respond in english"
+        : "सभी उत्तर हिंदी में दें। कृपया हिंदी में ही उत्तर दें।";
+
+    const model = gemini(systemPrompt, userLanguage);
 
     const result = await model.generateContent({
       contents: [
         {
           role: "user",
-          parts: [query],
+          parts: [
+            {
+              text: `${languageInstruction} ${query}`,
+            },
+          ],
         },
       ],
       generationConfig: {
         maxOutputTokens: 4000,
-        temperature: 0.9,
+        temperature: 0.7,
       },
     });
 
@@ -121,8 +138,13 @@ app.post("/api/explore", async (req:Request, res: Response) => {
   }
 });
 
-app.post("/api/explore-content", async (req:Request, res: Response) => {
-  const { query, age } = req.body;
+app.post("/api/explore-content", async (req: Request, res: Response) => {
+  const { query, age, userLanguage = "english" } = req.body;
+
+  const languageInstruction =
+    userLanguage === "hindi"
+      ? "सभी उत्तर हिंदी में दें। कृपया हिंदी में ही उत्तर दें।"
+      : "Please respond in English.";
 
   if (!query || !age) {
     res.json({
@@ -132,28 +154,28 @@ app.post("/api/explore-content", async (req:Request, res: Response) => {
   }
 
   try {
-    const { systemPrompt, userPrompt } = generatePromts({ query, age });
-    // const response = await openai.chat.completions.create({
-    //   model: "gpt-3.5-turbo",
-    //   messages: [
-    //     { role: "system", content: systemPrompt },
-    //     { role: "user", content: userPrompt },
-    //   ],
-    //   temperature: 0.7,
-    //   stream: true,
-    // });
-    const model = gemini(systemPrompt);
+    const { systemPrompt, userPrompt } = generatePromts({
+      query,
+      age,
+      userLanguage,
+    });
+
+    const model = gemini(systemPrompt, userLanguage);
     const result = await model.generateContent({
       contents: [
         {
           role: "user",
           parts: [
             {
-              text: userPrompt,
+              text: `${languageInstruction} ${userPrompt}`,
             },
           ],
         },
       ],
+      generationConfig: {
+        maxOutputTokens: 4000,
+        temperature: 0.7,
+      },
     });
 
     // for await (const part of response) {

@@ -1,11 +1,21 @@
 export const generatePromts = ({
   query,
   age,
+  userLanguage,
 }: {
   query: string;
   age: number;
+  userLanguage: string;
 }) => {
-  const systemPrompt = `You are a Gen-Z tutor who explains complex topics concisely for a ${age} year old.
+  // userLanguage = userLanguage = userLanguage.replace(/['"]+/g, "").trim().toLowerCase();
+  const languageInstruction =
+    userLanguage === "english"
+      ? "Please respond in english"
+      : "सभी उत्तर हिंदी में दें। कृपया हिंदी में ही उत्तर दें।";
+
+  const systemPrompt = `
+  ${languageInstruction}
+  You are a Gen-Z tutor who explains complex topics concisely for a ${age} year old.
           First provide the explanation in plain text, then provide related content in a STRICT single-line JSON format.
           
           Structure your response exactly like this:
@@ -45,9 +55,10 @@ export const generatePromts = ({
             * Mix of prerequisites and advanced concepts
             * Brief, clear explanation of importance
           - Topic types: prerequisite, extension, application, parallel, deeper
-          - Question types: curiosity, mechanism, causality, innovation, insight`;
+          - Question types: curiosity, mechanism, causality, innovation, insight 
+          `;
 
-  const userPrompt = `Explain "${query}" in three very concise paragraphs for a ${age} year old in genz style:
+  const userPrompt = `${languageInstruction} Explain "${query}" in three very concise paragraphs for a ${age} year old in genz style:
           1. Basic definition (15-20 words)
           2. Key details (15-20 words)
           3. Direct applications and facts (15-20 words)
@@ -56,7 +67,8 @@ export const generatePromts = ({
           - 5 related topics that help understand ${query} better (age-appropriate)
           - 5 mind-blowing questions (8-12 words each) that spark curiosity
           
-          Follow the format and length limits strictly.`;
+          Follow the format and length limits strictly.
+          `;
 
   return {
     systemPrompt,
