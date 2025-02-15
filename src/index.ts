@@ -45,6 +45,9 @@ app.post("/api/generate", async (req: Request, res: Response) => {
     //   max_tokens: maxTokens,
     // });
 
+   
+    
+
     const sanitizedUserPrompt = userPrompt.replace(/[\r\n]+/g, " ").trim();
     const sanitizedSystemPrompt = systemPrompt.replace(/[\r\n]+/g, " ").trim();
 
@@ -53,7 +56,7 @@ app.post("/api/generate", async (req: Request, res: Response) => {
         ? "Please respond in english"
         : "सभी उत्तर हिंदी में दें। कृपया हिंदी में ही उत्तर दें।";
 
-    const model = gemini(systemPrompt, userLanguage);
+    const model = gemini(sanitizedSystemPrompt, userLanguage);
 
     const result = await model.generateContent({
       contents: [
