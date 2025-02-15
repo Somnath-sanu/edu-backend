@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GenerativeModel, GoogleGenerativeAI } from "@google/generative-ai";
 
 const apiKey = process.env.GEMINI_API_KEY!;
 
@@ -13,5 +13,13 @@ export const gemini = (system: string, userLanguage: string) => {
     systemInstruction: system,
   });
 
-  return model;
+  const languageInstruction =
+    userLanguage === "english"
+      ? "Please respond in english"
+      : "सभी उत्तर हिंदी में दें। कृपया हिंदी में ही उत्तर दें।";
+
+  return {
+    model,
+    languageInstruction,
+  };
 };

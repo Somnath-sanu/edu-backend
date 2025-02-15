@@ -1,5 +1,4 @@
 import express from "express";
-import OpenAI from "openai";
 import dotenv from "dotenv";
 import cors from "cors";
 import { generatePromts } from "./explore-content";
@@ -16,11 +15,6 @@ app.use(minuteLimiter);
 app.use(hourlyLimiter);
 app.use(dailyLimiter);
 
-// const openai = new OpenAI({
-//   apiKey: process.env.OPENAI_API_KEY!,
-//   dangerouslyAllowBrowser: true,
-// });
-
 app.get("/", (req: Request, res: Response) => {
   res.send("Backend working");
 });
@@ -34,30 +28,13 @@ app.post("/api/generate", async (req: Request, res: Response) => {
   } = req.body;
 
   try {
-    // const response = await openai.chat.completions.create({
-    //   model: "gpt-3.5-turbo",
-    //   messages: [
-    //     {
-    //       role: "system",
-    //       content: systemPrompt,
-    //     },
-    //     {
-    //       role: "user",
-    //       content: userPrompt,
-    //     },
-    //   ],
-    //   max_tokens: maxTokens,
-    // });
-
     const sanitizedUserPrompt = userPrompt.replace(/[\r\n]+/g, " ").trim();
     const sanitizedSystemPrompt = systemPrompt.replace(/[\r\n]+/g, " ").trim();
 
-    const languageInstruction =
-      userLanguage === "english"
-        ? "Please respond in english"
-        : "सभी उत्तर हिंदी में दें। कृपया हिंदी में ही उत्तर दें।";
-
-    const model = gemini(sanitizedSystemPrompt, userLanguage);
+    const { model, languageInstruction } = gemini(
+      sanitizedSystemPrompt,
+      userLanguage
+    );
 
     const result = await model.generateContent({
       contents: [
@@ -92,31 +69,10 @@ app.post("/api/explore", async (req: Request, res: Response) => {
   }
 
   try {
-    // const response = await openai.chat.completions.create({
-    //   model: "gpt-3.5-turbo",
-    //   messages: [
-    //     {
-    //       role: "system",
-    //       content:
-    //         "You are a social media trend expert who explains topics by connecting them to current viral trends, memes, and pop culture moments.",
-    //     },
-    //     {
-    //       role: "user",
-    //       content: `${query}`,
-    //     },
-    //   ],
-    //   temperature: 0.9,
-    //   max_tokens: 4000,
-    // });
     const systemPrompt =
       "You are a social media trend expert who explains topics by connecting them to current viral trends, memes, and pop culture moments.";
 
-    const languageInstruction =
-      userLanguage === "english"
-        ? "Please respond in english"
-        : "सभी उत्तर हिंदी में दें। कृपया हिंदी में ही उत्तर दें।";
-
-    const model = gemini(systemPrompt, userLanguage);
+    const { model, languageInstruction } = gemini(systemPrompt, userLanguage);
 
     const result = await model.generateContent({
       contents: [
@@ -145,11 +101,6 @@ app.post("/api/explore", async (req: Request, res: Response) => {
 app.post("/api/explore-content", async (req: Request, res: Response) => {
   const { query, age, userLanguage = "english" } = req.body;
 
-  const languageInstruction =
-    userLanguage === "hindi"
-      ? "सभी उत्तर हिंदी में दें। कृपया हिंदी में ही उत्तर दें।"
-      : "Please respond in English.";
-
   if (!query || !age) {
     res.json({
       message: "Invalid input!",
@@ -161,10 +112,9 @@ app.post("/api/explore-content", async (req: Request, res: Response) => {
     const { systemPrompt, userPrompt } = generatePromts({
       query,
       age,
-      userLanguage,
     });
 
-    const model = gemini(systemPrompt, userLanguage);
+    const { model, languageInstruction } = gemini(systemPrompt, userLanguage);
     const result = await model.generateContent({
       contents: [
         {

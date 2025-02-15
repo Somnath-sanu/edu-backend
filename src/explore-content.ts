@@ -1,20 +1,14 @@
+import { gemini } from "./gemini";
+
 export const generatePromts = ({
   query,
   age,
-  userLanguage,
 }: {
   query: string;
   age: number;
-  userLanguage: string;
 }) => {
-  // userLanguage = userLanguage = userLanguage.replace(/['"]+/g, "").trim().toLowerCase();
-  const languageInstruction =
-    userLanguage === "english"
-      ? "Please respond in english"
-      : "सभी उत्तर हिंदी में दें। कृपया हिंदी में ही उत्तर दें।";
-
   const systemPrompt = `
-  ${languageInstruction}
+ 
   You are a Gen-Z tutor who explains complex topics concisely for a ${age} year old.
           First provide the explanation in plain text, then provide related content in a STRICT single-line JSON format.
           
@@ -58,7 +52,7 @@ export const generatePromts = ({
           - Question types: curiosity, mechanism, causality, innovation, insight 
           `;
 
-  const userPrompt = `${languageInstruction} Explain "${query}" in three very concise paragraphs for a ${age} year old in genz style:
+  const userPrompt = `Explain "${query}" in three very concise paragraphs for a ${age} year old in genz style:
           1. Basic definition (15-20 words)
           2. Key details (15-20 words)
           3. Direct applications and facts (15-20 words)
